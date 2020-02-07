@@ -3,13 +3,22 @@ Snakemake functional enrichment pipeline
 V. Keith Hughitt
 """
 import os
+import glob
 import yaml
+from pathlib import Path
 
 # output directory
 out_dir = os.path.join(config["output_dir"], config["version"])
 
 # dataset names and filepaths
-dataset_names = config["datasets"].keys()
+dset_paths = []
+
+for input_path in config["datasets"]["paths"]:
+    dset_paths = dset_paths + glob.glob(input_path)
+
+dset_names = [Path(x).stem for x in dset_paths]
+
+dset_mapping = {dset_names[i]:dset_paths[i] for i in range(len(dset_names))}
 
 # get a list of gene sets to be analyzed
 gmts = os.listdir(config["gene_sets"]["include"])
@@ -17,14 +26,15 @@ gene_set_names = [x.replace(".gmt", "") for x in gmts]
 
 rule all:
     input:
-        expand(os.path.join(out_dir, "results/summary/{dataset}_summary.tsv"),
-               dataset=dataset_names)
+        expand(os.path.join(out_dir, "results/summary/{dataset}_cor_mat.tsv"),
+               dataset=dset_names)
 
 rule summarize_results:
     input:
         os.path.join(out_dir, "results/merged/{dataset}.parquet")
     output:
-        os.path.join(out_dir, "results/summary/{dataset}_summary.tsv")
+        summary=os.path.join(out_dir, "results/summary/{dataset}_summary.tsv"),
+        cor_mat=os.path.join(out_dir, "results/summary/{dataset}_cor_mat.tsv")
     script: "src/summarize_results.R"
 
 
@@ -48,4 +58,4 @@ rule create_dataset_symlinks:
     output:
         os.path.join(out_dir, "input", "{dataset}.feather")
     run:
-        os.symlink(config["datasets"][wildcards["dataset"]]["path"], output[0])
+        os.symlink(dset_mapping[wildcards["dataset"]], output[0])

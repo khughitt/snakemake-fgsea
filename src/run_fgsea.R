@@ -20,7 +20,7 @@ dat <- read_feather(snakemake@input$dataset)
 # drop any unneeded columns
 dataset_name <- snakemake@wildcards$dataset
 
-dataset_config <- snakemake@config$datasets[[dataset_name]]
+dataset_config <- snakemake@config$datasets
 
 if ("exclude" %in% names(dataset_config)) {
   dat <- dat[, !colnames(dat) %in% dataset_config$exclude]
@@ -56,8 +56,6 @@ if (snakemake@wildcards[['gene_set']] == "DSigDB_All") {
 
 fgsea_results <- NULL
 
-save.image('~/tmp-fgsea.rda')
-
 # iterate over dataset columns, skipping id column at position 1
 for (i in 2:ncol(dat)) {
   # create a named vector of the numeric values to be tested for enrichment
@@ -76,6 +74,8 @@ for (i in 2:ncol(dat)) {
   gene_vals <- gene_vals[!is.na(gene_vals)]
 
   cname <- colnames(dat)[i]
+
+  set.seed(1)
 
   # run fgsea on the gene scores
   res <- fgsea(gene_sets, stats = gene_vals, nperm = fgsea_nperm, 
