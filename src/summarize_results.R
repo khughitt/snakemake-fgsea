@@ -8,7 +8,7 @@ suppressMessages(library(tidyverse))
 options(stringsAsFactors = FALSE)
 
 # load fgsea results
-dat <- read_parquet(snakemake@input[[1]])
+dat <- read_feather(snakemake@input[[1]])
 
 # summarize level of significant enrichment for each covariate
 dat %>%

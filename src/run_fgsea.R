@@ -3,7 +3,7 @@
 #
 suppressMessages(library(arrow))
 suppressMessages(library(GSEABase))
-suppressMessages(library(feather))
+suppressMessages(library(arrow))
 suppressMessages(library(fgsea))
 suppressMessages(library(tidyverse))
 
@@ -91,4 +91,5 @@ for (i in 2:ncol(dat)) {
 # drop entries for which no p-value could be computed
 fgsea_results <- fgsea_results[complete.cases(fgsea_results), ]
 
-write_parquet(fgsea_results, snakemake@output[[1]], compression = 'ZSTD')
+# write_parquet(fgsea_results, snakemake@output[[1]], compression = 'ZSTD')
+write_feather(fgsea_results, snakemake@output[[1]])

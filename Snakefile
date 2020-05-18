@@ -31,7 +31,7 @@ rule all:
 
 rule summarize_results:
     input:
-        os.path.join(out_dir, "results/merged/{dataset}.parquet")
+        os.path.join(out_dir, "results/merged/{dataset}.feather")
     output:
         summary=os.path.join(out_dir, "results/summary/{dataset}_summary.tsv"),
         cor_mat=os.path.join(out_dir, "results/summary/{dataset}_cor_mat.tsv")
@@ -40,10 +40,10 @@ rule summarize_results:
 
 rule combine_results:
     input:
-        expand(os.path.join(out_dir, "results/{{dataset}}/collections/{gene_set}.parquet"),
+        expand(os.path.join(out_dir, "results/{{dataset}}/collections/{gene_set}.feather"),
                gene_set=gene_set_names)
     output:
-        os.path.join(out_dir, "results/merged/{dataset}.parquet")
+        os.path.join(out_dir, "results/merged/{dataset}.feather")
     script: "src/combine_results.R"
 
 rule run_fgsea:
@@ -51,7 +51,7 @@ rule run_fgsea:
         dataset=os.path.join(out_dir, "input", "{dataset}.feather"),
         gmt=os.path.join(config["gene_sets"]["include"], "{gene_set}.gmt")
     output:
-        os.path.join(out_dir, "results/{dataset}/collections/{gene_set}.parquet")
+        os.path.join(out_dir, "results/{dataset}/collections/{gene_set}.feather")
     script: "src/run_fgsea.R"
 
 rule create_dataset_symlinks:

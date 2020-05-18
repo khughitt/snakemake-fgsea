@@ -5,6 +5,7 @@
 suppressMessages(library(arrow))
 options(stringsAsFactors = FALSE)
 
-dat <- do.call(rbind, lapply(snakemake@input, read_parquet))
+dat <- do.call(rbind, lapply(snakemake@input, read_feather))
 
-write_parquet(dat, snakemake@output[[1]], compression = 'ZSTD')
+# write_feather(dat, snakemake@output[[1]], compression = 'ZSTD')
+write_feather(dat, snakemake@output[[1]])
