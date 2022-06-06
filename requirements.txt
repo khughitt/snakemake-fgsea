@@ -1,8 +1,10 @@
-conda-forge::python>=3.6
+conda-forge::python>=3.8
 conda-forge::r-base
 bioconductor-fgsea
 bioconductor-gseabase
+libthrift
 r-annotables
-r-feather
+r-arrow
+r-igraph
 r-tidyverse
 snakemake-minimal

@@ -12,7 +12,6 @@ set.seed(1)
 # configuration parameters
 min_size <- snakemake@config$gene_sets$min_size
 max_size <- snakemake@config$gene_sets$max_size
-fgsea_nperm <- snakemake@config$gene_sets$fgsea_nperm
 
 # load gene scores
 dat <- read_feather(snakemake@input$dataset)
@@ -78,7 +77,9 @@ for (i in 2:ncol(dat)) {
   set.seed(1)
 
   # run fgsea on the gene scores
-  res <- fgsea(gene_sets, stats = gene_vals, nperm = fgsea_nperm, 
+  res <- fgsea(gene_sets, stats = gene_vals, 
+               scoreType = snakemake@config$fgsea$score_type,
+               eps = snakemake@config$fgsea$eps,
                nproc = snakemake@config$num_threads) %>%
     select(-leadingEdge) %>%
     arrange(pval)
