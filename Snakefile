@@ -20,15 +20,8 @@ dset_names = [Path(x).stem for x in dset_paths]
 
 dset_mapping = {dset_names[i]:dset_paths[i] for i in range(len(dset_names))}
 
-# get a list of gene sets to be analyzed
-gmts = os.listdir(config["gene_sets"]["include"])
-gmts = [x for x in gmts if x.endswith('.gmt')]
-gene_set_names = [x.replace(".gmt", "") for x in gmts]
-
 rule all:
     input:
-        expand(os.path.join(out_dir, "results/summary/{dataset}_cor_mat.tsv"),
-               dataset=dset_names),
         expand(os.path.join(out_dir, "results/networks/{dataset}.graphml"),
                 dataset=dset_names)
 
@@ -37,37 +30,21 @@ rule summarize_results:
         os.path.join(out_dir, "results/merged/{dataset}.feather")
     output:
         summary=os.path.join(out_dir, "results/summary/{dataset}_summary.tsv"),
-        cor_mat=os.path.join(out_dir, "results/summary/{dataset}_cor_mat.tsv")
     script: "src/summarize_results.R"
 
 rule create_networks:
     input:
-        os.path.join(out_dir, "results/merged/{dataset}.feather")
+        os.path.join(out_dir, "results/{dataset}/gene_sets.feather")
     output:
         os.path.join(out_dir, "results/networks/{dataset}.graphml")
     script: "src/create_networks.R"
 
-rule combine_results:
-    input:
-        expand(os.path.join(out_dir, "results/{{dataset}}/collections/{gene_set}.feather"),
-               gene_set=gene_set_names)
-    output:
-        os.path.join(out_dir, "results/merged/{dataset}.feather")
-    script: "src/combine_results.R"
-
 rule run_fgsea:
     input: 
         dataset=os.path.join(out_dir, "input", "{dataset}.feather"),
-        gmt=os.path.join(config["gene_sets"]["include"], "{gene_set}.gmt")
     output:
-        os.path.join(out_dir, "results/{dataset}/collections/{gene_set}.feather")
+        os.path.join(out_dir, "results/{dataset}/gene_sets.feather")
     script: "src/run_fgsea.R"
-
-rule create_gene_set_similarity_matrix:
-    output:
-        sim_mat=os.path.join(config["gene_sets"]["include"], "similarity", "similarity_matrix.feather"),
-        mapping=os.path.join(config["gene_sets"]["include"], "similarity", "similarity_matrix_ids.feather")
-    script: "src/compute_gene_set_similarity_matrix.R"
 
 rule create_dataset_symlinks:
     output:
